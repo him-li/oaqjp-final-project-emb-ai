@@ -1,8 +1,20 @@
 import requests
 import json
 
+NONE_RESPONSE = {
+    'anger': None,
+    'disgust': None,
+    'fear': None,
+    'joy': None,
+    'sadness': None,
+    'dominant_emotion': None
+}
+
 
 def emotion_detector(text_to_analyze):
+    if text_to_analyze is None or text_to_analyze.strip() == "":
+        return NONE_RESPONSE
+
     url = 'https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict'
 
     headers = {
@@ -17,8 +29,10 @@ def emotion_detector(text_to_analyze):
 
     response = requests.post(url, json=input_json, headers=headers)
 
-    formatted_response = json.loads(response.text)
+    if response.status_code == 400:
+        return NONE_RESPONSE
 
+    formatted_response = json.loads(response.text)
     emotions = formatted_response['emotionPredictions'][0]['emotion']
 
     anger_score = emotions['anger']
